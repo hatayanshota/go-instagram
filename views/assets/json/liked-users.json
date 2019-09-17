@@ -1,0 +1,22 @@
+[
+    {
+        "likes_id": 1,
+        "user_name": "Taro",
+        "icon_url": "https://i1.wp.com/ai-catcher.com/wp-content/uploads/icon_74-1.png?fit=567%2C567&ssl=1"
+    },
+    {
+        "likes_id": 2,
+        "user_name": "Hanako",
+        "icon_url": "https://i1.wp.com/ai-catcher.com/wp-content/uploads/icon_74-1.png?fit=567%2C567&ssl=1"
+    },
+    {
+        "likes_id": 3,
+        "user_name": "Jiro",
+        "icon_url": "https://i1.wp.com/ai-catcher.com/wp-content/uploads/icon_74-1.png?fit=567%2C567&ssl=1"
+    },
+    {
+        "likes_id": 4,
+        "user_name": "Kikuko",
+        "icon_url": "https://i1.wp.com/ai-catcher.com/wp-content/uploads/icon_74-1.png?fit=567%2C567&ssl=1"
+    }
+]

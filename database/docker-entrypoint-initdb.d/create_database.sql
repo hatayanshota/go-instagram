@@ -1,0 +1,5 @@
+-- CREATE DATABASE IF NOT EXISTS `instagram` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci';
+-- CREATE USER 'instagram-api'@'%' IDENTIFIED BY 'F2fENVzZ8PNG';
+-- GRANT SELECT,INSERT,UPDATE,DELETE ON `instagram`.* TO 'instagram-api'@'%' WITH GRANT OPTION;
+-- -- 作業用のユーザー
+-- GRANT ALL ON `instagram`.* TO `tlab-app`@'%';
