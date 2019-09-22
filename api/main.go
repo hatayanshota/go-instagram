@@ -3,17 +3,15 @@
 package main
 
 import (
-	"instagram/api/model"
-	"instagram/api/public"
-	"instagram/api/route"
+	"instagram/api/infrastructure/api/middleware"
+	"instagram/api/infrastructure/api/router"
+	"instagram/api/infrastructure/database"
+	"instagram/api/infrastructure/env"
 
 	_ "instagram/api/docs"
-)
 
-func init() {
-	//godotenvの初期化
-	public.SetEnv()
-}
+	"github.com/labstack/echo"
+)
 
 // @title インスタグラムもどき課題 API サーバー
 // @version 1.0.0
@@ -30,19 +28,28 @@ func init() {
 // @host localhost:8080
 // @BasePath /
 func main() {
+
+	// godotenvの初期化
+	env.SetEnv()
+
+	// データベース接続
+	db := database.NewMysqlDB()
+
+	// interacterの設定
+	r := registry.Newinteracter(db)
+
+	// 依存解決
+	h := r.NewAppHandler()
+
 	// Echoのインスタンス作る
-	e := route.NewEcho()
+	e := echo.New()
 
-	//データベース接続
-	db := model.NewDb()
-	model.Migrate(db)
-
-	//ルーティング
-	route.Route(e)
+	//router
+	router.NewRouter(e, h)
 
 	//ミドルウェア
-	public.Middleware(e)
+	middleware.Middleware(e)
 
 	// サーバー起動
-	e.Start(":80") //ポート番号指定してね
+	e.Start(":80")
 }
