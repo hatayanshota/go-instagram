@@ -26,8 +26,8 @@ type AuthHandler interface {
 }
 
 // このクラスのゲッター
-func NewAuthHandler(sc controllers.SignupController) AuthHandler {
-	return &authHandler{authController: sc}
+func NewAuthHandler(uc controllers.UserController) AuthHandler {
+	return &authHandler{userController: uc}
 }
 
 // github認証時の状態確認用文字列

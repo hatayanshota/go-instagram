@@ -7,11 +7,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// type cookieHnadler struct {
+// }
+
+// type CookieHnadler interface {
+// 	SetGithubTokenCookie(c echo.Context) error
+// 	ClearCookie(c echo.Context) bool
+// }
+
 // クッキーとセッションに保存するハッシュの名前を定数で宣言
 const githubTokenHash = "github_token_hash"
 
 // Githubのトークンをハッシュ化したものをクッキーに設定する
-func SetGithubTokenCookie(c echo.Context) error {
+func (cookieHnadler *cookieHnadler) SetGithubTokenCookie(c echo.Context) error {
 	cookie := new(http.Cookie)
 	cookie.Name = githubTokenHash
 	cookie.Value = c.Param("token_hash")
@@ -27,7 +35,7 @@ func SetGithubTokenCookie(c echo.Context) error {
 }
 
 // クッキーの有効期限を切れるように設定する
-func ClearCookie(c echo.Context) bool {
+func (cookieHnadler *cookieHnadler) ClearCookie(c echo.Context) bool {
 	cookie, err := c.Cookie(githubTokenHash)
 	if err != nil {
 		return false

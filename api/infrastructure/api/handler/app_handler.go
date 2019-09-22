@@ -4,4 +4,7 @@ type AppHandler interface {
 	UserHandler
 	PostHandler
 	LikeHandler
+	AuthHandler
+	// CookieHnadler
+	// SessionHandler
 }

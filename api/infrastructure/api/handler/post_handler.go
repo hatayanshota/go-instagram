@@ -21,7 +21,7 @@ type PostHandler interface {
 }
 
 func NewPostHandler(pc controllers.PostController) PostHandler {
-	return &PostHandler{postHandler: pc
+	return &PostHandler{postHandler: pc}
 }
 
 //新規投稿(user_id, caption, imageでPOST)

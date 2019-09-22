@@ -8,8 +8,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// type sessionHandler struct {
+// }
+
+// type SessionHandler interface {
+// 	SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc
+// 	ClearSession(c echo.Context) bool
+// }
+
+// func NewSessionHandler() {
+// 	return
+// }
+
 // GitHubのトークンをハッシュ化したものをsessionに保存する
-func SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc {
+func (sessionHandler *sessionHandler) SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 	return func(c echo.Context) error {
 		sess, _ := session.Get("session", c)
@@ -35,7 +47,7 @@ func SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc {
 }
 
 // セッションの有効期限を切れるように設定する
-func ClearSession(c echo.Context) bool {
+func (sessionHandler *sessionHandler) ClearSession(c echo.Context) bool {
 	sess, err := session.Get("session", c)
 	if err != nil {
 		return false

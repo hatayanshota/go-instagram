@@ -6,27 +6,31 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-//db接続情報を持つ
+// db接続情報を持つリポジトリ
 type userRepository struct {
 	db *gorm.DB
 }
 
-//ユーザーテーブル操作のインターフェース
+// インターフェース
 type UserRepository interface {
 	Create(user *model.User) error
+	GetByGithubId(user *model.User, githubUserId uint) (*modelUser, error)
 	GetByID(id uint, user *model.User) (*model.User, error)
 	GetLoginUser(loginUser *model.User, githubToken string) (*model.User, bool, error)
+	UpdateField(user *model.User, oldField string, newField string)
 }
 
+// コンストラクタ
 func NewUserRepository(db *gorm.DB) {
 	return &userRepository{db}
 }
 
-//ユーザーカラムの新規作成
+// ユーザーカラムの新規作成
 func (userRepository *userRepository) Create(user *model.User) error {
 	return userRepository.db.Create(user).Error
 }
 
+// ユーザーカラムの取得(githubIdから)
 func (userRepository *userRepository) GetByGithubId(user *model.User, githubUserId uint) (*modelUser, error) {
 	if err := userRepository.db.Where("github_id = ?", githubUserId).First(user).Error; err != nil {
 		return nil, err
@@ -34,7 +38,7 @@ func (userRepository *userRepository) GetByGithubId(user *model.User, githubUser
 	return user, nil
 }
 
-// ユーザー取得(idから)
+// ユーザーカラムの取得(idから)
 func (userRepository *userRepository) GetByID(id uint, user *model.User) (*model.User, error) {
 
 	// 投稿といいねした投稿とともに取得
@@ -45,6 +49,7 @@ func (userRepository *userRepository) GetByID(id uint, user *model.User) (*model
 	return user, nil
 }
 
+// ユーザーカラムの取得(現在ログインしているユーザー)
 func (userRepository *userRepository) GetLoginUser(loginUser *model.User, githubToken string) (*model.User, bool, error) {
 	if err := userRepository.db.Where("github_token = ?", githubToken).First(loginUser).Error; err != nil {
 		return loginUser, false, err
@@ -52,7 +57,7 @@ func (userRepository *userRepository) GetLoginUser(loginUser *model.User, github
 	return loginUser, true, nil
 }
 
-// 指定したフィールドを更新
+// 指定したフィールドの更新
 func (userRepository *userRepository) UpdateField(user *model.User, oldField string, newField string) {
 	if err := userRepository.db.Model(&user).Update(oldField, newField).Error; err != nil {
 		return nil, err

@@ -16,6 +16,11 @@ type StorageRepository interface {
 	UploadFile(imagefile io.Reader, id string, contenType string) error
 }
 
+// コンストラクタ
+func NewStorageRepository(s3Config *aws.Config) {
+	return &storageRepository{s3Config}
+}
+
 // s3にファイルをアップロード
 func (storageRepository *storageRepository) UploadFile(uploadImage *model.UploadImage) error {
 

@@ -15,8 +15,10 @@ require (
 	github.com/labstack/echo-contrib v0.6.0
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/labstack/gommon v0.3.0 // indirect
+	github.com/spf13/viper v1.4.0 // indirect
 	github.com/swaggo/echo-swagger v0.0.0-20190329130007-1219b460a043
 	github.com/swaggo/swag v1.6.2
+	github.com/yoshinorihisakawa/sample-api-hoop v0.0.0-20180818100527-365e01bc5b51
 	golang.org/x/crypto v0.0.0-20190829043050-9756ffdc2472
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 )

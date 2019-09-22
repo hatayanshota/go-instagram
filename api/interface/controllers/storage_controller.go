@@ -8,6 +8,10 @@ type StorageController interface {
 	UploadFile(imagefile io.Reader, id string, contenType string) error
 }
 
+func NewStorageController(ss service.StorageService) StorageController {
+	return &storageController{ss}
+}
+
 func (storageController *storageController) UploadFile(imagefile io.Reader, id string, contenType string) error {
 	uploadImage := &model.UploadImage{
 		ACL:         aws.String("public-read"),

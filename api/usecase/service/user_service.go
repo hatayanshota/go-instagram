@@ -8,7 +8,6 @@ import (
 // serviceはrepositoryのインターフェースとpresenterのインターフェースに依存
 type userService struct {
 	UserRepository repository.UserRepository
-	UserPresenter  presenter.UserPresenter
 }
 
 // インターフェース
@@ -16,6 +15,7 @@ type UserService interface {
 	Create(user *model.User) error
 	GetByID(id uint, user *model.User) *model.User, error
 	GetLoginUser(u *model.User, githubToken string) (*model.User, bool, error)
+	Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, githubUserId uint) (bool, error)
 }
 
 // コンストラクタ
