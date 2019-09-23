@@ -8,10 +8,11 @@ import (
 	"instagram/api/infrastructure/database"
 	"instagram/api/infrastructure/env"
 	"instagram/api/infrastructure/storage"
+	"instagram/api/registry"
 
 	_ "instagram/api/docs"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // @title インスタグラムもどき課題 API サーバー
@@ -40,9 +41,9 @@ func main() {
 	s3Config := storage.NewS3()
 
 	// interacterの設定
-	r := registry.Newinteracter(db, s3Config)
+	r := registry.NewInteractor(db, s3Config)
 
-	// 依存解決
+	// コンストラクタインジェクションによるDI
 	h := r.NewAppHandler()
 
 	// Echoのインスタンス作る

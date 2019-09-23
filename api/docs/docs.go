@@ -31,7 +31,7 @@ var doc = `{
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/auth": {
+        "/login": {
             "get": {
                 "description": "sessionとcookieの値を比較し、ログイン状態を判定",
                 "consumes": [

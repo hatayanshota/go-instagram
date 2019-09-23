@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"instagram/api/infrastructure/utils"
 	"instagram/api/interface/controllers"
-	"instagram/api/public"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type likeHandler struct {
@@ -20,7 +20,7 @@ type LikeHandler interface {
 }
 
 func NewLikeHandler(lc controllers.LikeController, pc controllers.PostController) LikeHandler {
-	return &likeHandler{likeHandler: lc, postController: pc}
+	return &likeHandler{lc, pc}
 }
 
 // モデルとは異なるLikeを設定
@@ -63,9 +63,9 @@ func (likeHandler *likeHandler) DeleteLike(c echo.Context) error {
 func (likeHandler *likeHandler) GetLike(c echo.Context) error {
 
 	// post_idを取得
-	postId := utils.PathParamToUint(c, "post_id")
+	postID := utils.PathParamToUint(c, "post_id")
 
-	post, err := likeHandler.postController.GetPostByID(postId)
+	post, err := likeHandler.postController.GetPostByID(postID)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

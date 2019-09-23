@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"instagram/api/model"
-	"instagram/api/usecase/usecase/service"
+	"instagram/api/domain/model"
+	"instagram/api/usecase/service"
 )
 
 // controlleはserviceに依存
@@ -12,7 +12,12 @@ type postController struct {
 
 // インターフェース宣言
 type PostController interface {
-	CreatePost(post *model.Post) error
+	GetLastPostID() (uint, error)
+	CreatePost(userID uint, imageUrl string, caption string) error
+	GetPost(pageNum int) (*[]model.Post, error)
+	GetPostCount() (int, error)
+	GetPostByID(postID uint) (*model.Post, error)
+	DeletePost(postID uint) error
 }
 
 // serviceに依存したcontrollerを生成
@@ -25,42 +30,42 @@ func (postController *postController) GetLastPostID() (uint, error) {
 	return postController.postService.GetLastPostID(post)
 }
 
-func (postController *postController) CreatePost(userId, imageUrl, caption) error {
+func (postController *postController) CreatePost(userID uint, imageUrl string, caption string) error {
 	// usecaseで扱いやすい形に変換
 	post := &model.Post{
-		UserID: userId
-		ImageURL: imageUrl
-		Caption: caption
+		UserID:   userID,
+		ImageURL: imageUrl,
+		Caption:  caption,
 	}
-	return postController.PostService.CreatePost(post)
+	return postController.postService.CreatePost(post)
 }
 
 // 指定したページの投稿を取得
-func (postController *postController) GetPost(pageNum int) (*model.Post, error) {
+func (postController *postController) GetPost(pageNum int) (*[]model.Post, error) {
 	posts := &[]model.Post{}
 
-	return postController.PostService.GetPost(pageNum, posts)
+	return postController.postService.GetPost(pageNum, posts)
 }
 
 // 投稿の数を取得
 func (postController *postController) GetPostCount() (int, error) {
 	posts := &[]model.Post{}
 	var c int
-	
-	count, err := postController.PostService.GetPostCount(posts, c)
+
+	count, err := postController.postService.GetPostCount(posts, c)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	return count, nil
 }
 
-func (postController *postController) GetPostByID(postId uint) (*model.Post, error) {
+func (postController *postController) GetPostByID(postID uint) (*model.Post, error) {
 	post := &model.Post{}
 
-	return postController.PostService.GetPostByID(post, postId)
+	return postController.postService.GetPostByID(post, postID)
 }
 
-func (postController *postController) DeletePost(postId uint) error {
-	return postController.PostService.DeletePost(postId)
+func (postController *postController) DeletePost(postID uint) error {
+	return postController.postService.DeletePost(postID)
 }

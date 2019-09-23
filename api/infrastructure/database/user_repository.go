@@ -1,7 +1,7 @@
 package database
 
 import (
-	"instagram/api/model"
+	"instagram/api/domain/model"
 
 	"github.com/jinzhu/gorm"
 )
@@ -14,14 +14,14 @@ type userRepository struct {
 // インターフェース
 type UserRepository interface {
 	Create(user *model.User) error
-	GetByGithubId(user *model.User, githubUserId uint) (*modelUser, error)
+	GetByGithubId(user *model.User, githubUserId uint) (*model.User, error)
 	GetByID(id uint, user *model.User) (*model.User, error)
 	GetLoginUser(loginUser *model.User, githubToken string) (*model.User, bool, error)
-	UpdateField(user *model.User, oldField string, newField string)
+	UpdateField(user *model.User, oldField string, newField string) error
 }
 
 // コンストラクタ
-func NewUserRepository(db *gorm.DB) {
+func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db}
 }
 
@@ -31,7 +31,7 @@ func (userRepository *userRepository) Create(user *model.User) error {
 }
 
 // ユーザーカラムの取得(githubIdから)
-func (userRepository *userRepository) GetByGithubId(user *model.User, githubUserId uint) (*modelUser, error) {
+func (userRepository *userRepository) GetByGithubId(user *model.User, githubUserId uint) (*model.User, error) {
 	if err := userRepository.db.Where("github_id = ?", githubUserId).First(user).Error; err != nil {
 		return nil, err
 	}
@@ -58,9 +58,9 @@ func (userRepository *userRepository) GetLoginUser(loginUser *model.User, github
 }
 
 // 指定したフィールドの更新
-func (userRepository *userRepository) UpdateField(user *model.User, oldField string, newField string) {
+func (userRepository *userRepository) UpdateField(user *model.User, oldField string, newField string) error {
 	if err := userRepository.db.Model(&user).Update(oldField, newField).Error; err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }

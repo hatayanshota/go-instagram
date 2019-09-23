@@ -1,9 +1,8 @@
 package controllers
 
 import (
-	"instagram/api/usecase/usecase/service"
-
-	"github.com/labstack/echo"
+	"instagram/api/domain/model"
+	"instagram/api/usecase/service"
 )
 
 // controlleはserviceに依存
@@ -13,9 +12,11 @@ type userController struct {
 
 // インターフェース宣言
 type UserController interface {
-	CreateUser(user *model.User) error
-	GetUserByID(id uint) *model.User error
-	GetLoginUser(c echo.Context) *model.User bool error
+	CreateUserByModel(user *model.User) error
+	CreateUser(tokenHash string, githubUserIcon string, githubUserName string, githubUserId uint) error
+	GetUserByID(id uint) (*model.User, error)
+	GetLoginUser(githubToken string) (*model.User, bool, error)
+	ExistsUser(githubToken, githubUserIcon, githubUserName string, githubUserId uint) (bool, error)
 }
 
 // serviceに依存したcontrollerを生成
@@ -24,25 +25,25 @@ func NewUserController(us service.UserService) UserController {
 }
 
 // ユーザーの作成(modelから)
-func (userController *userController) CreateUser(user *model.User) error {
+func (userController *userController) CreateUserByModel(user *model.User) error {
 	return userController.userService.Create(user)
 }
 
 // ユーザーの作成
-func (userController *userController) CreateUser(token_hash, github_user_icon, github_user_name, github_user_id) error {
-	
+func (userController *userController) CreateUser(tokenHash string, githubUserIcon string, githubUserName string, githubUserId uint) error {
+
 	user := &model.User{
-		GithubToken: token_hash, 
-		Icon: github_user_icon,
-		Name: github_user_name,
-		GithubID: github_user_id
+		GithubToken: tokenHash,
+		Icon:        githubUserIcon,
+		Name:        githubUserName,
+		GithubID:    githubUserId,
 	}
 
 	return userController.userService.Create(user)
 }
 
 // ユーザーの取得
-func (userController *userController) GetUserByID(id uint) (*model.User error) {
+func (userController *userController) GetUserByID(id uint) (*model.User, error) {
 
 	u := &model.User{}
 
@@ -55,7 +56,7 @@ func (userController *userController) GetUserByID(id uint) (*model.User error) {
 
 // ログインユーザーの取得
 func (userController *userController) GetLoginUser(githubToken string) (*model.User, bool, error) {
-	
+
 	u := &model.User{}
 
 	loginUser, isLogin, err := userController.userService.GetLoginUser(u, githubToken)

@@ -11,7 +11,7 @@ info:
   title: インスタグラムもどき課題 API サーバー
   version: 1.0.0
 paths:
-  /auth:
+  /login:
     get:
       consumes:
       - application/json

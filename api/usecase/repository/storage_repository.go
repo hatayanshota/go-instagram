@@ -1,7 +1,7 @@
 package repository
 
-import "io"
+import "instagram/api/domain/model"
 
-type StrageRepository interface {
-	UploadFile(imagefile io.Reader, id string, contenType string) error
+type StorageRepository interface {
+	Upload(uploadImage *model.UploadImage) error
 }

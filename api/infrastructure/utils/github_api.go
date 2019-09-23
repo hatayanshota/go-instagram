@@ -11,7 +11,7 @@ import (
 type GithubUser struct {
 	UserIcon string `json:"avatar_url"`
 	UserName string `json:"name"`
-	UserId   uint   `json:"id"`
+	UserID   uint   `json:"id"`
 }
 
 // Githubからユーザ情報を取得する
@@ -33,5 +33,5 @@ func GetGithubUser(token string) (user_icon, user_name string, user_id uint) {
 		log.Fatal(err)
 	}
 
-	return gu.UserIcon, gu.UserName, gu.UserId
+	return gu.UserIcon, gu.UserName, gu.UserID
 }

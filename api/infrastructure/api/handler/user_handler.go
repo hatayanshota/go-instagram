@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"instagram/api/domain/model"
+	"instagram/api/infrastructure/utils"
+	"instagram/api/interface/controllers"
 	"net/http"
-	"instagram/api/model"
+	"strconv"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // handlerはcontrollerに依存
@@ -15,7 +18,7 @@ type userHandler struct {
 // インターフェース
 type UserHandler interface {
 	CreateUser(c echo.Context) error
-	GetUser(c echo.Context) error
+	GetUserByID(c echo.Context) error
 	GetLoginUser(c echo.Context) error
 }
 
@@ -26,7 +29,7 @@ func NewUserHandler(uc controllers.UserController) UserHandler {
 
 //ユーザーの作成
 func (userHandler *userHandler) CreateUser(c echo.Context) error {
-	
+
 	// リクエスト用のentityを作成
 	user := &model.User{}
 
@@ -36,13 +39,12 @@ func (userHandler *userHandler) CreateUser(c echo.Context) error {
 	}
 
 	// handlerにデータを渡す
-	err := userHandler.userController.CreateUser(user); err != nil {
+	if err := userHandler.userController.CreateUserByModel(user); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	return c.NoContent(http.StatusOK)
 }
-
 
 // idからユーザーの取得
 func (userHandler *userHandler) GetUserByID(c echo.Context) error {
@@ -70,6 +72,6 @@ func (userHandler *userHandler) GetLoginUser(c echo.Context) error {
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-	
+
 	return c.JSON(http.StatusOK, user)
 }

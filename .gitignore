@@ -3,3 +3,4 @@ db-data/
 api/tmp/
 !.gitkeep
 envfiles/.env
+.env

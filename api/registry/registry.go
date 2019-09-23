@@ -1,6 +1,13 @@
 package registry
 
 import (
+	"instagram/api/infrastructure/api/handler"
+	"instagram/api/infrastructure/database"
+	"instagram/api/infrastructure/storage"
+	"instagram/api/interface/controllers"
+	"instagram/api/usecase/repository"
+	"instagram/api/usecase/service"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/jinzhu/gorm"
 )
@@ -12,18 +19,18 @@ type interactor struct {
 }
 
 // インターフェース
-type Iteractor interface {
+type Interactor interface {
 	NewAppHandler() handler.AppHandler
 }
 
 // コンストラクタ
-func NewInteractor(db *gorm.DB) Iteractor {
+func NewInteractor(db *gorm.DB, s3Config *aws.Config) Interactor {
 	return &interactor{db, s3Config}
 }
 
 // Appハンドラ
 func (i *interactor) NewAppHandler() handler.AppHandler {
-	return i.NewUserHandler(), i.NewPostHandler(), i.NewLikeHandler(), i.NewAuthHandler()
+	return handler.NewAppHandler(i.NewUserHandler(), i.NewPostHandler(), i.NewLikeHandler(), i.NewAuthHandler())
 }
 
 // userハンドラ
@@ -33,7 +40,7 @@ func (i *interactor) NewUserHandler() handler.UserHandler {
 
 // postハンドラ
 func (i *interactor) NewPostHandler() handler.PostHandler {
-	return handler.NewPostHandler(i.NewPostController()), i.NewUserController(), i.NewStorageController()
+	return handler.NewPostHandler(i.NewPostController(), i.NewUserController(), i.NewStorageController())
 }
 
 // likeハンドラ
@@ -103,5 +110,5 @@ func (i *interactor) NewLikeRepository() repository.LikeRepository {
 
 // storageリポジトリ
 func (i *interactor) NewStorageRepository() repository.StorageRepository {
-	return database.NewStorageRepository(i.s3Config)
+	return storage.NewStorageRepository(i.s3Config)
 }

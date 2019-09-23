@@ -1,5 +1,10 @@
 package controllers
 
+import (
+	"instagram/api/domain/model"
+	"instagram/api/usecase/service"
+)
+
 // controlleはserviceに依存
 type likeController struct {
 	likeService service.LikeService
@@ -7,8 +12,8 @@ type likeController struct {
 
 // インターフェース宣言
 type LikeController interface {
-	CreateLike(userId uint, postId uint) error
-	DeleteLike(userId uint, postId uint) error
+	CreateLike(userID uint, postID uint) error
+	DeleteLike(userID uint, postID uint) error
 }
 
 // serviceに依存したcontrollerを生成
@@ -17,17 +22,17 @@ func NewLikeController(ls service.LikeService) LikeController {
 }
 
 // 新規いいね
-func (likeController *likeController) CreateLike(userId uint, postId uint) error {
+func (likeController *likeController) CreateLike(userID uint, postID uint) error {
 	like := &model.Like{
-		UserID: userId,
-		PostID: postId
+		UserID: userID,
+		PostID: postID,
 	}
 
 	return likeController.likeService.CreateLike(like)
 }
 
 // いいね削除
-func (likeController *likeController) DeleteLike(userId uint, postId uint) error {
-	like := &Like{}
-	return likeController.LikeService.DeleteLike(like, userId, postId)
+func (likeController *likeController) DeleteLike(userID uint, postID uint) error {
+	like := &model.Like{}
+	return likeController.likeService.DeleteLike(like, userID, postID)
 }

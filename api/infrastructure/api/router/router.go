@@ -3,7 +3,8 @@ package router
 import (
 	"instagram/api/infrastructure/api/handler"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func NewRouter(e *echo.Echo, handler handler.AppHandler) {
@@ -11,19 +12,19 @@ func NewRouter(e *echo.Echo, handler handler.AppHandler) {
 	// swaggerを使う
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	e.GET("/auth", handler.AuthUserLogin)
-
-	e.GET("/logout", handler.UserLogout)
-
 	// サインアップ
 	e.GET("/signup", handler.GithubAuth)
 	e.GET("/login/github/callback", handler.GithubCallback)
-	e.GET("/set/cookie/:token_hash", handler.SetGithubTokenCookie)
-	e.GET("/set/session/:token_hash", handler.SetGithubTokenSession(e))
+
+	// ログイン
+	e.GET("/login", handler.AuthUserLogin)
+
+	// ログアウト
+	e.GET("/logout", handler.UserLogout)
 
 	// userデータベース操作
 	e.POST("/user", handler.CreateUser)
-	e.GET("/users/:id", handler.GetUser)
+	e.GET("/users/:id", handler.GetUserByID)
 	e.GET("/users/mydata", handler.GetLoginUser)
 
 	// postデータベース操作

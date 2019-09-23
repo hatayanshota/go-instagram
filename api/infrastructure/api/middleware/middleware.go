@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +17,8 @@ func Middleware(e *echo.Echo) {
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowCredentials: bool{true},
+		AllowCredentials: true,
 	}))
+
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 }

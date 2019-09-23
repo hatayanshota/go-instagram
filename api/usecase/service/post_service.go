@@ -1,42 +1,51 @@
 package service
 
 import (
-	"instagram/api/model"
+	"instagram/api/domain/model"
 	"instagram/api/usecase/repository"
 )
 
 // serviceはrepositoryのインターフェースとpresenterのインターフェースに依存
 type postService struct {
-	PostRepository repository.PostRepository
-	PostPresenter  presenter.PostPresenter
+	postRepository repository.PostRepository
 }
 
 // インターフェース
 type PostService interface {
+	GetLastPostID(post *model.Post) (uint, error)
 	CreatePost(post *model.Post) error
+	GetPost(pageNum int, posts *[]model.Post) (*[]model.Post, error)
+	GetPostCount(posts *[]model.Post, count int) (int, error)
+	GetPostByID(post *model.Post, postID uint) (*model.Post, error)
+	DeletePost(postID uint) error
 }
 
 // コンストラクタ
-func NewPostService(repo repository.PostRepository, pre presenter.PostPresenter) PostService {
-	return &PostService{repo, pre}
+func NewPostService(repo repository.PostRepository) PostService {
+	return &postService{repo}
 }
 
-func () GetLastPostID(post *model.Post) (uint, error) {
-	return postService.PostRepository.GetLastID(post)
+func (postService *postService) GetLastPostID(post *model.Post) (uint, error) {
+	return postService.postRepository.GetLastID(post)
 }
 
 // postカラム新規作成
 func (postService *postService) CreatePost(post *model.Post) error {
-	return postService.PostRepository.Create(post)
+	return postService.postRepository.Create(post)
 }
 
 // 指定したページの投稿を取得
-func (postService *postService) GetPost(pageNum int, posts *model.posts) (*model.Posts, error) {
+func (postService *postService) GetPost(pageNum int, posts *[]model.Post) (*[]model.Post, error) {
 
 	// 1ページ分の投稿数を指定
 	count := 10
 
-	posts, err := postService.PostRepository.GetForThisPage(psgeNum, count, posts)
+	var offset = 0
+	if pageNum != 0 {
+		offset = (pageNum - 1) * 10
+	}
+
+	posts, err := postService.postRepository.GetForThisPage(count, offset, posts)
 	if err != nil {
 		return nil, err
 	}
@@ -45,13 +54,13 @@ func (postService *postService) GetPost(pageNum int, posts *model.posts) (*model
 }
 
 func (postService *postService) GetPostCount(posts *[]model.Post, count int) (int, error) {
-	return postService.PostRepository.GetCount(posts, count)
+	return postService.postRepository.GetCount(posts, count)
 }
 
-func (postService *postService) GetPostByID(post *model.Post, postId uint) (*model.Post, error) {
-	return postService.PostRepository.GetByID(post, postId)
+func (postService *postService) GetPostByID(post *model.Post, postID uint) (*model.Post, error) {
+	return postService.postRepository.GetByID(post, postID)
 }
 
-func (postService *postService) DeletePost(postId uint) error {
-	return postService.PostRepository.Delete(postId uint)
+func (postService *postService) DeletePost(postID uint) error {
+	return postService.postRepository.Delete(postID)
 }

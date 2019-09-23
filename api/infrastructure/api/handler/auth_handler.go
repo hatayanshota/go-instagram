@@ -2,11 +2,13 @@ package handler
 
 import (
 	"instagram/api/infrastructure/utils"
-	"instagram/api/model"
-	"instagram/api/public"
+	"instagram/api/interface/controllers"
+	"time"
+
 	"net/http"
 	"os"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 
@@ -23,6 +25,8 @@ type authHandler struct {
 type AuthHandler interface {
 	GithubAuth(c echo.Context) error
 	GithubCallback(c echo.Context) error
+	AuthUserLogin(c echo.Context) error
+	UserLogout(c echo.Context) error
 }
 
 // このクラスのゲッター
@@ -75,23 +79,25 @@ func (authHandler *authHandler) GithubCallback(c echo.Context) error {
 	github_user_icon, github_user_name, github_user_id := utils.GetGithubUser(access_token)
 
 	// トークンからクッキーとセッションに保存するハッシュを作成
-	token_hash := utils.TokenToHash(access_token)
+	tokenHash := utils.TokenToHash(access_token)
 
 	// ユーザが存在しなければ作成
-	exist, err := authHandler.userController.ExistsUser(token_hash, github_user_icon, github_user_name, github_user_id)
+	exist, err := authHandler.userController.ExistsUser(tokenHash, github_user_icon, github_user_name, github_user_id)
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
-	}
-	else if exist == false {
-		if err := authHandler.userController.CreateUser(token_hash, github_user_icon, github_user_name, github_user_id); err != nil {
+	} else if exist == false {
+		if err := authHandler.userController.CreateUser(tokenHash, github_user_icon, github_user_name, github_user_id); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 	}
 
-	// ハッシュをcookieに設定するためにリダイレクト
-	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:8080/set/cookie/"+token_hash)
+	// ハッシュをcookieとセッションに保存
+	if err := setGithubTokenCookie(c, tokenHash); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
 
-	return c.String(http.StatusOK, token_hash)
+	// ホーム画面へ移動
+	return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/posts")
 }
 
 // AuthUserLogin ユーザーのログイン状態を判定
@@ -102,12 +108,11 @@ func (authHandler *authHandler) GithubCallback(c echo.Context) error {
 // @Produce json
 // @Success 200 {string} OK
 // @Failure 401 {string} Unauthorized
-// @Router /auth [get]
+// @Router /login [get]
 func (authHandler *authHandler) AuthUserLogin(c echo.Context) error {
-
 	sess, err := session.Get("session", c)
-	github_token_session, ok := sess.Values[githubTokenHash]
-	if err != nil || !ok || github_token_session.(string) != utils.ReadGithuTokenCookie(c) {
+	githubTokenSession, ok := sess.Values[githubTokenHash]
+	if err != nil || !ok || githubTokenSession.(string) != utils.ReadGithuTokenCookie(c) {
 		return c.NoContent(http.StatusUnauthorized)
 	} else {
 		return c.NoContent(http.StatusOK)
@@ -123,4 +128,77 @@ func (authHandler *authHandler) UserLogout(c echo.Context) error {
 	} else {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+}
+
+// クッキーとセッションに保存するハッシュの名前を定数で宣言
+const githubTokenHash = "github_token_hash"
+
+// Githubのトークンをハッシュ化したものをクッキーに設定
+func setGithubTokenCookie(c echo.Context, tokenHash string) error {
+	cookie := new(http.Cookie)
+	cookie.Name = githubTokenHash
+	cookie.Value = tokenHash
+	cookie.Expires = time.Now().Add(24 * time.Hour) // １日でセッションがなくなる
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	c.SetCookie(cookie)
+
+	// クッキーを設定できたらセッションにハッシュを保存するように遷移
+	if err := setGithubTokenSession(c, tokenHash); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GitHubのトークンをハッシュ化したものをsessionに保存
+func setGithubTokenSession(c echo.Context, tokenHash string) error {
+	sess, _ := session.Get("session", c)
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7, // 1週間でセッションが消される
+		HttpOnly: true,
+	}
+
+	// セッションに値を代入
+	sess.Values[githubTokenHash] = tokenHash
+
+	// セッションを保存できたか確認
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// クッキー削除
+func ClearCookie(c echo.Context) bool {
+	cookie, err := c.Cookie(githubTokenHash)
+	if err != nil {
+		return false
+	}
+	cookie.MaxAge = -1
+	c.SetCookie(cookie)
+
+	return true
+}
+
+// セッション削除
+func ClearSession(c echo.Context) bool {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return false
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return false
+	}
+
+	return true
 }

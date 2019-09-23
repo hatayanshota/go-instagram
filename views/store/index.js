@@ -56,7 +56,7 @@ export const actions = {
     var options = {
       withCredentials: true
     }
-    const res = await $axios.get("http://localhost:8080/auth", options)
+    const res = await $axios.get("http://localhost:8080/login", options)
     console.log(res)
     if (res.status == 200) {
       ctx.commit("setLogin")

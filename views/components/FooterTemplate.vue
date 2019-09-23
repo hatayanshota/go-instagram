@@ -18,7 +18,7 @@ export default {
             var options = {
                 withCredentials: true
             }
-            const res = this.$axios.get("http://localhost:8080/auth", options)
+            const res = this.$axios.get("http://localhost:8080/login", options)
                 .then( res => {
                     this.$router.push("/posts")
                 })
@@ -30,7 +30,7 @@ export default {
             var options = {
                 withCredentials: true
             }
-            const res = this.$axios.get("http://localhost:8080/auth", options)
+            const res = this.$axios.get("http://localhost:8080/login", options)
                 .then( res => {
                     this.$router.push("/posts/new")
                 })

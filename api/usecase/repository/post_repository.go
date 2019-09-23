@@ -1,12 +1,13 @@
 package repository
 
-import "instagram/api/model"
+import "instagram/api/domain/model"
 
 //テーブル操作のインターフェース
 type PostRepository interface {
 	Create(post *model.Post) error
-	GetForThisPage(pageNum int, count int, posts *model.Posts) (*model.Posts, error)
-	GetCount(posts *[]model.Post, count int) (count, error)
+	GetForThisPage(count int, offset int, posts *[]model.Post) (*[]model.Post, error)
+	GetCount(posts *[]model.Post, count int) (int, error)
 	GetLastID(post *model.Post) (uint, error)
-	Delete(postId uint) error
+	GetByID(post *model.Post, postID uint) (*model.Post, error)
+	Delete(postID uint) error
 }

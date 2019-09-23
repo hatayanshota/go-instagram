@@ -1,7 +1,7 @@
 package database
 
 import (
-	"instagram/api/model"
+	"instagram/api/domain/model"
 
 	"github.com/jinzhu/gorm"
 )
@@ -14,10 +14,11 @@ type postRepository struct {
 //テーブル操作のインターフェース
 type PostRepository interface {
 	Create(post *model.Post) error
-	GetForThisPage(pageNum int, count int, posts *model.Posts) (*model.Posts, error)
-	GetCount(posts *[]model.Post, count int) (count, error)
+	GetForThisPage(count int, offset int, posts *[]model.Post) (*[]model.Post, error)
+	GetCount(posts *[]model.Post, count int) (int, error)
 	GetLastID(post *model.Post) (uint, error)
-	Delete(postId uint) error
+	GetByID(post *model.Post, postID uint) (*model.Post, error)
+	Delete(postID uint) error
 }
 
 func NewPostRepository(db *gorm.DB) PostRepository {
@@ -30,9 +31,9 @@ func (postRepository *postRepository) Create(post *model.Post) error {
 }
 
 // 指定ページに対応した投稿を取得
-func (postRepository *postRepository) GetForThisPage(pageNum int, count int, posts *model.Posts) (*model.Posts, error) {
+func (postRepository *postRepository) GetForThisPage(count int, offset int, posts *[]model.Post) (*[]model.Post, error) {
 
-	err := postRepository.db.Order("id desc").Limit(count)).Offset(offset).Preload("User").Preload("LikeUsers").Find(&posts).Error
+	err := postRepository.db.Order("id desc").Limit(count).Offset(offset).Preload("User").Preload("LikeUsers").Find(&posts).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +42,9 @@ func (postRepository *postRepository) GetForThisPage(pageNum int, count int, pos
 }
 
 // postカラムの個数を取得
-func (postRepository *postRepository) GetCount(posts *[]model.Post, count int) (count, error) {
-	if err := postRepository.db.Find(&posts).Count(&count).Error; err!= nil {
-		return nil, err
+func (postRepository *postRepository) GetCount(posts *[]model.Post, count int) (int, error) {
+	if err := postRepository.db.Find(&posts).Count(&count).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }
@@ -51,14 +52,14 @@ func (postRepository *postRepository) GetCount(posts *[]model.Post, count int) (
 // postテーブルから最後のidを取得
 func (postRepository *postRepository) GetLastID(post *model.Post) (uint, error) {
 	if err := postRepository.db.Last(post).Error; err != nil {
-		return nil, err
+		return 0, err
 	}
-	return post.ID, err
+	return post.ID, nil
 }
 
-func (postRepository *postRepository) GetByID(post *model.Post, postId uint) (*model.Post, error) {
+func (postRepository *postRepository) GetByID(post *model.Post, postID uint) (*model.Post, error) {
 
-	if err := postRepository.db.Where("id = ?", postId).First(&post).Error; err != nil {
+	if err := postRepository.db.Where("id = ?", postID).First(&post).Error; err != nil {
 		return nil, err
 	}
 
@@ -66,12 +67,12 @@ func (postRepository *postRepository) GetByID(post *model.Post, postId uint) (*m
 		return nil, err
 	}
 
-	return post, err
+	return post, nil
 }
 
-// カラム削除　
-func (postRepository *postRepository) Delete(postId uint) error {
-	
+// カラム削除
+func (postRepository *postRepository) Delete(postID uint) error {
+
 	// トランザクション開始
 	tx := postRepository.db.Begin()
 
@@ -87,12 +88,12 @@ func (postRepository *postRepository) Delete(postId uint) error {
 		return err
 	}
 
-	if err := postRepository.db.Unscoped().Where("post_id = ?", post_id).Delete(&[]Like{}).Error; err != nil {
+	if err := postRepository.db.Unscoped().Where("post_id = ?", postID).Delete(&[]model.Like{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := postRepository.db.Unscoped().Where("id = ?", post_id).Delete(&Post{}).Error; err != nil {
+	if err := postRepository.db.Unscoped().Where("id = ?", postID).Delete(&model.Post{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

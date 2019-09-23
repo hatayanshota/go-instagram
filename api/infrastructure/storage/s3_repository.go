@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"io"
+	"instagram/api/domain/model"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,16 +13,16 @@ type storageRepository struct {
 }
 
 type StorageRepository interface {
-	UploadFile(imagefile io.Reader, id string, contenType string) error
+	Upload(uploadImage *model.UploadImage) error
 }
 
 // コンストラクタ
-func NewStorageRepository(s3Config *aws.Config) {
+func NewStorageRepository(s3Config *aws.Config) StorageRepository {
 	return &storageRepository{s3Config}
 }
 
 // s3にファイルをアップロード
-func (storageRepository *storageRepository) UploadFile(uploadImage *model.UploadImage) error {
+func (storageRepository *storageRepository) Upload(uploadImage *model.UploadImage) error {
 
 	sess := session.Must(session.NewSession(storageRepository.s3Config))
 
