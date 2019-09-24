@@ -25,5 +25,7 @@ func NewMysqlDB() *gorm.DB {
 	db.AutoMigrate(&model.Like{}).AddForeignKey("user_id", "users(id)", "RESTRICT", "RESTRICT")
 	db.Model(&model.Like{}).AddForeignKey("post_id", "posts(id)", "RESTRICT", "RESTRICT")
 
+	// db.DropTable("likes", "posts", "users")
+
 	return db
 }

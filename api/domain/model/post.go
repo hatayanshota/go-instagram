@@ -8,7 +8,7 @@ type Post struct {
 	UserID    uint       `gorm:"not null;default:0" json:"user_id"`
 	ImageURL  string     `gorm:"type:varchar(255);not null;default:''" json:"image"`
 	Caption   string     `gorm:"type:varchar(255);not null;default:''" json:"caption"`
-	LikeUsers []User     `gorm:"many2many:likes" json:"like_users"`
+	LikeUsers []User     `json:"like_users"`
 	Likes     []Like     `json:"likes"`
 	User      User       `json:"user"`
 	CreatedAt time.Time  `json:"created_at"`

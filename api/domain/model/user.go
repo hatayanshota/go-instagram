@@ -10,7 +10,7 @@ type User struct {
 	Name        string     `gorm:"type:varchar(255);not null;default:''" json:"name"`
 	GithubID    uint       `gorm:"type:int;not null;default:0" json:"github_id"`
 	Posts       []Post     `json:"posts"`
-	LikePosts   []Post     `gorm:"many2many:likes" json:"like_posts"`
+	LikePosts   []Post     `json:"like_posts"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	DeletedAt   *time.Time `json:"deleted_at"`
