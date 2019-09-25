@@ -1,5 +1,6 @@
 # go-instagram
 Goによるインスタグラムもどきの開発
+feature/refactoringブランチでクリーンアーキテクチャへリファクタリング(まだマージしていません)
 
 ## パッケージ構成
 - `view` ... [フロント画面](admin/README.md)
