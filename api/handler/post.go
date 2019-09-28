@@ -65,7 +65,7 @@ func CreatePost(c echo.Context) error {
 	id_int := int(id_uint) + 1
 	id := strconv.Itoa(id_int)
 
-	image_url := "http://s3.ap-northeast-1.amazonaws.com/cms-intern-module/go-instagram/" + id
+	image_url := "http://s3.ap-northeast-1.amazonaws.com/go-instagram/" + id
 
 	model.CreatePost(user_id, image_url, caption)
 

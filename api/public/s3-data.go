@@ -1,6 +1,7 @@
 package public
 
 import (
+	"fmt"
 	_ "image/png"
 	"io"
 	"os"
@@ -31,11 +32,13 @@ func UploadFile(imagefile io.Reader, id string, content_type string) error {
 		ACL:         aws.String("public-read"),
 		ContentType: aws.String(content_type),
 		Bucket:      bucket,
-		Key:         aws.String("go-instagram/" + id),
+		Key:         aws.String(id),
 		Body:        imagefile,
 	}
 
-	_, err := uploader.Upload(cparams)
+	url, err := uploader.Upload(cparams)
+	fmt.Println("エラーだよ", err)
+	fmt.Println("urlは", url)
 
 	return err
 }
