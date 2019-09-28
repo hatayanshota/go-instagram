@@ -15,7 +15,7 @@ type UserService interface {
 	Create(user *model.User) error
 	GetByID(id uint, user *model.User) (*model.User, error)
 	GetLoginUser(u *model.User, githubToken string) (*model.User, bool, error)
-	Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, userID uint) (bool, error)
+	Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, githubID uint) (bool, error)
 }
 
 // コンストラクタ
@@ -41,11 +41,11 @@ func (userService *userService) GetLoginUser(u *model.User, githubToken string) 
 }
 
 // GithubのIDでユーザの一意性を確保しつつ検索をかける
-func (userService *userService) Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, userID uint) (bool, error) {
+func (userService *userService) Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, githubID uint) (bool, error) {
 
-	if user, err := userService.UserRepository.GetByGithubId(user, userID); err != nil {
+	if user, err := userService.UserRepository.GetByGithubId(user, githubID); err != nil {
 		return false, err
-	} else {
+	} else if user != nil {
 		// ハッシュが更新されている場合はデータベースを更新
 		if user.GithubToken != githubToken {
 			if err := userService.UserRepository.UpdateField(user, "github_token", githubToken); err != nil {
@@ -65,5 +65,7 @@ func (userService *userService) Exists(user *model.User, githubToken, githubUser
 			}
 		}
 		return true, nil
+	} else {
+		return false, nil
 	}
 }

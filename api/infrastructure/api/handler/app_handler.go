@@ -15,6 +15,6 @@ type AppHandler interface {
 	AuthHandler
 }
 
-func NewAppHandler(uh UserHandler, ph PostHandler, lh LikeHandler, ah AuthHandler) appHandler {
+func NewAppHandler(uh UserHandler, ph PostHandler, lh LikeHandler, ah AuthHandler) AppHandler {
 	return appHandler{uh, ph, lh, ah}
 }

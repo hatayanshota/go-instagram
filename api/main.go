@@ -9,6 +9,7 @@ import (
 	"instagram/api/infrastructure/env"
 	"instagram/api/infrastructure/storage"
 	"instagram/api/registry"
+	"log"
 
 	_ "instagram/api/docs"
 
@@ -34,25 +35,32 @@ func main() {
 	// godotenvの初期化
 	env.SetEnv()
 
-	// データベース設定
+	// データベース接続
 	db := database.NewMysqlDB()
+
+	// データベース切断
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// aws sdk設定
 	s3Config := storage.NewS3()
 
-	// interacterの設定
+	// コンストラクタインジェクションによるDI
 	r := registry.NewInteractor(db, s3Config)
 
-	// コンストラクタインジェクションによるDI
+	// ハンドラ設定
 	h := r.NewAppHandler()
 
-	// Echoのインスタンス作る
+	// Echoのインスタンス作成
 	e := echo.New()
 
-	//router
+	// routerの設定
 	router.NewRouter(e, h)
 
-	//ミドルウェア
+	// ミドルウェア
 	middleware.Middleware(e)
 
 	// サーバー起動

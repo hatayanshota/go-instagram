@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// db接続情報を持つリポジトリ
+// db接続情報を持つ
 type userRepository struct {
 	db *gorm.DB
 }
@@ -15,7 +15,7 @@ type userRepository struct {
 // インターフェース
 type UserRepository interface {
 	Create(user *model.User) error
-	GetByGithubId(user *model.User, githubUserId uint) (*model.User, error)
+	GetByGithubId(user *model.User, githubID uint) (*model.User, error)
 	GetByID(id uint, user *model.User) (*model.User, error)
 	GetLoginUser(loginUser *model.User, githubToken string) (*model.User, bool, error)
 	UpdateField(user *model.User, oldField string, newField string) error
@@ -32,8 +32,8 @@ func (userRepository *userRepository) Create(user *model.User) error {
 }
 
 // ユーザーカラムの取得(githubIdから)
-func (userRepository *userRepository) GetByGithubId(user *model.User, githubUserId uint) (*model.User, error) {
-	if err := userRepository.db.Where("github_id = ?", githubUserId).First(user).Error; err != nil {
+func (userRepository *userRepository) GetByGithubId(user *model.User, githubID uint) (*model.User, error) {
+	if err := userRepository.db.Where("github_id = ?", githubID).First(user).Error; err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
