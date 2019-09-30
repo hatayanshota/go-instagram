@@ -5,6 +5,7 @@ import (
 	"instagram/api/domain/model"
 	"instagram/api/infrastructure/utils"
 	"instagram/api/interface/controllers"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -53,6 +54,7 @@ func (postHandler *postHandler) CreatePost(c echo.Context) error {
 
 	//拡張子取得
 	_, format, err := image.DecodeConfig(imagefile)
+	log.Fatal(err)
 	if err != nil {
 		return c.String(400, "これは画像ファイルではありません")
 	}

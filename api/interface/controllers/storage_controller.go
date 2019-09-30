@@ -26,7 +26,7 @@ func (storageController *storageController) UploadFile(imagefile io.Reader, id s
 		ACL:         aws.String("public-read"),
 		ContentType: aws.String(contentType),
 		Bucket:      aws.String(os.Getenv("BUCKET_NAME")),
-		Key:         aws.String("go-instagram/" + id),
+		Key:         aws.String(id),
 		Body:        imagefile,
 	}
 	return storageController.storageService.UploadFile(uploadImage)

@@ -27,6 +27,8 @@ type AuthHandler interface {
 	GithubCallback(c echo.Context) error
 	AuthUserLogin(c echo.Context) error
 	UserLogout(c echo.Context) error
+	SetGithubTokenCookie(c echo.Context) error
+	SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc
 }
 
 // このクラスのゲッター
@@ -69,35 +71,33 @@ func (authHandler *authHandler) GithubCallback(c echo.Context) error {
 
 	//認証コードを取得してトークンに変換
 	code := c.FormValue("code")
-	github_token, err := oauthConf.Exchange(oauth2.NoContext, code)
+	githubToken, err := oauthConf.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
-	access_token := github_token.AccessToken
+	accessToken := githubToken.AccessToken
 
 	// GitHubAPIからユーザ情報を取得
-	github_user_icon, github_user_name, github_user_id := utils.GetGithubUser(access_token)
+	githubUserIcon, githubUserName, githubUserID := utils.GetGithubUser(accessToken)
 
 	// トークンからクッキーとセッションに保存するハッシュを作成
-	tokenHash := utils.TokenToHash(access_token)
+	tokenHash := utils.TokenToHash(accessToken)
 
 	// ユーザが存在しなければ作成
-	exist, err := authHandler.userController.ExistsUser(tokenHash, github_user_icon, github_user_name, github_user_id)
+	exist, err := authHandler.userController.ExistsUser(tokenHash, githubUserIcon, githubUserName, githubUserID)
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	} else if exist == false {
-		if err := authHandler.userController.CreateUser(tokenHash, github_user_icon, github_user_name, github_user_id); err != nil {
+		if err := authHandler.userController.CreateUser(tokenHash, githubUserIcon, githubUserName, githubUserID); err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 	}
 
-	// ハッシュをcookieとセッションに保存
-	if err := setGithubTokenCookie(c, tokenHash); err != nil {
-		return c.NoContent(http.StatusBadRequest)
-	}
+	// ハッシュをcookieに設定するためにリダイレクト
+	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:8080/set/cookie/"+tokenHash)
 
 	// ホーム画面へ移動
-	return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/posts")
+	return c.String(http.StatusOK, tokenHash)
 }
 
 // AuthUserLogin ユーザーのログイン状態を判定
@@ -133,42 +133,46 @@ func (authHandler *authHandler) UserLogout(c echo.Context) error {
 // クッキーとセッションに保存するハッシュの名前を定数で宣言
 const githubTokenHash = "github_token_hash"
 
-// Githubのトークンをハッシュ化したものをクッキーに設定
-func setGithubTokenCookie(c echo.Context, tokenHash string) error {
+// Githubのトークンをハッシュ化したものをクッキーに設定する
+func (authHandler *authHandler) SetGithubTokenCookie(c echo.Context) error {
 	cookie := new(http.Cookie)
 	cookie.Name = githubTokenHash
-	cookie.Value = tokenHash
+	cookie.Value = c.Param("token_hash")
 	cookie.Expires = time.Now().Add(24 * time.Hour) // １日でセッションがなくなる
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	c.SetCookie(cookie)
 
 	// クッキーを設定できたらセッションにハッシュを保存するように遷移
-	if err := setGithubTokenSession(c, tokenHash); err != nil {
-		return err
-	}
+	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:8080/set/session/"+c.Param("token_hash"))
 
-	return nil
+	return c.String(http.StatusOK, cookie.Value)
 }
 
-// GitHubのトークンをハッシュ化したものをsessionに保存
-func setGithubTokenSession(c echo.Context, tokenHash string) error {
-	sess, _ := session.Get("session", c)
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7, // 1週間でセッションが消される
-		HttpOnly: true,
+// GitHubのトークンをハッシュ化したものをsessionに保存する
+func (authHandler *authHandler) SetGithubTokenSession(e *echo.Echo) echo.HandlerFunc {
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
+	return func(c echo.Context) error {
+		sess, _ := session.Get("session", c)
+		sess.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   86400 * 7, // 1週間でセッションが消される
+			HttpOnly: true,
+		}
+
+		// セッションに値を代入
+		sess.Values[githubTokenHash] = c.Param("token_hash")
+
+		// セッションを保存できたか確認
+		if err := sess.Save(c.Request(), c.Response()); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		// クライアントのホーム画面へ移動
+		c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000/posts")
+
+		return c.NoContent(http.StatusOK)
 	}
-
-	// セッションに値を代入
-	sess.Values[githubTokenHash] = tokenHash
-
-	// セッションを保存できたか確認
-	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // クッキー削除

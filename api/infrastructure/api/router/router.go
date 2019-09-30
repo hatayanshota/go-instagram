@@ -15,6 +15,8 @@ func NewRouter(e *echo.Echo, handler handler.AppHandler) {
 	// サインアップ
 	e.GET("/signup", handler.GithubAuth)
 	e.GET("/login/github/callback", handler.GithubCallback)
+	e.GET("/set/cookie/:token_hash", handler.SetGithubTokenCookie)
+	e.GET("/set/session/:token_hash", handler.SetGithubTokenSession(e))
 
 	// ログイン
 	e.GET("/login", handler.AuthUserLogin)
