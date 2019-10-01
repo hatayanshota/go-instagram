@@ -9,10 +9,12 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
+const mysqlConnection = "mysql", os.Getenv("MYSQL_USER") + ":" + os.Getenv("MYSQL_PASSWORD") + "@tcp(mysql:3306)/" + os.Getenv("MYSQL_DATABASE") + "?parseTime=true&loc=Asia%2FTokyo"
+
 // DB接続
 func NewMysqlDB() *gorm.DB {
 
-	db, err := gorm.Open("mysql", os.Getenv("MYSQL_USER")+":"+os.Getenv("MYSQL_PASSWORD")+"@tcp(mysql:3306)/"+os.Getenv("MYSQL_DATABASE")+"?parseTime=true&loc=Asia%2FTokyo")
+	db, err := gorm.Open(mysqlConnection)
 	if err != nil {
 		log.Fatal(err)
 	}

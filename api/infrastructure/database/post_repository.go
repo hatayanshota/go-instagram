@@ -52,6 +52,9 @@ func (postRepository *postRepository) GetCount(posts *[]model.Post, count int) (
 // postテーブルから最後のidを取得
 func (postRepository *postRepository) GetLastID(post *model.Post) (uint, error) {
 	if err := postRepository.db.Last(post).Error; err != nil {
+		if err.Error() == "record not found" {
+			return 0, nil
+		}
 		return 0, err
 	}
 	return post.ID, nil

@@ -2,10 +2,13 @@ package handler
 
 import (
 	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"instagram/api/domain/model"
 	"instagram/api/infrastructure/utils"
 	"instagram/api/interface/controllers"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -54,7 +57,6 @@ func (postHandler *postHandler) CreatePost(c echo.Context) error {
 
 	//拡張子取得
 	_, format, err := image.DecodeConfig(imagefile)
-	log.Fatal(err)
 	if err != nil {
 		return c.String(400, "これは画像ファイルではありません")
 	}
@@ -82,7 +84,7 @@ func (postHandler *postHandler) CreatePost(c echo.Context) error {
 	}
 	id_int := int(id_uint) + 1
 	id := strconv.Itoa(id_int)
-	image_url := "http://s3.ap-northeast-1.amazonaws.com/cms-intern-module/go-instagram/" + id
+	image_url := "http://s3.ap-northeast-1.amazonaws.com/go-instagram/" + id
 
 	// storageに画像保存
 	if err := postHandler.storageController.UploadFile(imagefile, id, content_type); err != nil {

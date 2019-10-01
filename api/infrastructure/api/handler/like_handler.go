@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"instagram/api/infrastructure/utils"
 	"instagram/api/interface/controllers"
 	"net/http"
@@ -31,6 +32,7 @@ type LikeData struct {
 
 // いいねしたユーザーのidと投稿のidが送られることが前提
 func (likeHandler *likeHandler) CreateLike(c echo.Context) error {
+	fmt.Println("呼ばれたよ")
 
 	like := new(LikeData)
 	if err := c.Bind(like); err != nil {
