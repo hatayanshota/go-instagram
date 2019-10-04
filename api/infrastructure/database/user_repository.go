@@ -2,7 +2,6 @@ package database
 
 import (
 	"instagram/api/domain/model"
-	"log"
 
 	"github.com/jinzhu/gorm"
 )
@@ -34,7 +33,9 @@ func (userRepository *userRepository) Create(user *model.User) error {
 // ユーザーカラムの取得(githubIdから)
 func (userRepository *userRepository) GetByGithubId(user *model.User, githubID uint) (*model.User, error) {
 	if err := userRepository.db.Where("github_id = ?", githubID).First(user).Error; err != nil {
-		log.Fatal(err)
+		if err.Error() == "record not found" {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return user, nil

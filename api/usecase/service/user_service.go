@@ -43,7 +43,7 @@ func (userService *userService) GetLoginUser(u *model.User, githubToken string) 
 // GithubのIDでユーザの一意性を確保しつつ検索をかける
 func (userService *userService) Exists(user *model.User, githubToken, githubUserIcon, githubUserName string, githubID uint) (bool, error) {
 
-	if user, err := userService.UserRepository.GetByGithubId(user, githubID); err != nil {
+	if user, err := userService.UserRepository.GetByGithubId(user, githubID); err != nil { // githubidからユーザーデータ参照
 		return false, err
 	} else if user != nil {
 		// ハッシュが更新されている場合はデータベースを更新
